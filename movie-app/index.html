@@ -1,0 +1,261 @@
+<!-- index.html - 前端界面 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>家庭影院 | 私有云聚合</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:linear-gradient(145deg,#0a0c15 0%,#07090f 100%);font-family:system-ui,'Segoe UI',Roboto,sans-serif;color:#f0f3fa;padding:1rem;min-height:100vh}
+        .container{max-width:1100px;margin:0 auto}
+        .hero{text-align:center;margin-bottom:1.8rem;padding-top:0.5rem}
+        .hero h1{font-size:2rem;background:linear-gradient(135deg,#c084fc,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .sub-notice{font-size:0.75rem;color:#6c86a3;margin-top:0.5rem;border-top:1px dashed #2d3a5e;display:inline-block;padding-top:0.5rem}
+        .card{background:rgba(15,23,42,0.75);backdrop-filter:blur(12px);border-radius:1.5rem;border:1px solid rgba(59,130,246,0.35);padding:1.25rem;margin-bottom:1.5rem}
+        .hidden{display:none !important}
+        .player-container{position:relative;padding-bottom:56.25%;height:0;background:#000;border-radius:1rem;margin-bottom:1rem}
+        .player-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+        .player-title{font-size:1.2rem;font-weight:bold;margin-bottom:0.4rem}
+        .episode-list{display:flex;flex-wrap:wrap;gap:0.6rem;padding:1rem 0.25rem;max-height:260px;overflow-y:auto;background:rgba(0,0,0,0.25);border-radius:1rem;margin-top:0.75rem}
+        .episode-btn{background:#1e293b;border:1px solid #334155;padding:0.5rem 1.2rem;border-radius:2rem;color:#cbd5e6;cursor:pointer;transition:0.2s}
+        .episode-btn.active{background:#3b82f6;color:white;border-color:#3b82f6}
+        .search-group{display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+        .search-group input{flex:1;min-width:200px;background:#0f172a;border:1px solid #334155;padding:0.85rem 1.3rem;border-radius:3rem;color:white;font-size:0.95rem;outline:none}
+        .btn{border:none;padding:0.8rem 1.6rem;border-radius:3rem;color:white;cursor:pointer;font-weight:600;transition:0.2s;background:rgba(255,255,255,0.08)}
+        .btn-search{background:linear-gradient(95deg,#3b82f6,#8b5cf6)}
+        .results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1.2rem;margin-top:0.5rem}
+        .result-card{background:#1e293b;border-radius:1rem;overflow:hidden;cursor:pointer;transition:0.25s;border:1px solid #2d3a5e}
+        .result-card:hover{transform:translateY(-6px);border-color:#3b82f6}
+        .result-cover{width:100%;aspect-ratio:2/3;object-fit:cover;background:#0f172a}
+        .result-info{padding:0.7rem}
+        .result-title{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .result-source{font-size:0.7rem;color:#60a5fa;margin-top:0.25rem}
+        .source-list{display:flex;flex-wrap:wrap;gap:0.7rem;margin:1rem 0;max-height:180px;overflow-y:auto}
+        .source-tag{background:#1e293b;padding:0.45rem 0.9rem;border-radius:2rem;display:inline-flex;align-items:center;gap:0.6rem;border-left:3px solid #3b82f6}
+        .del-btn{background:none;border:none;color:#f87171;cursor:pointer;font-size:1.2rem;width:22px;border-radius:30px}
+        .add-form{display:flex;gap:0.6rem;flex-wrap:wrap;background:#0f172a;padding:1rem;border-radius:1.5rem;margin-top:0.5rem}
+        .add-form input{flex:1;background:#020617;border:1px solid #334155;padding:0.7rem 1rem;border-radius:2rem;color:white}
+        .close-player-btn{position:absolute;top:0.9rem;right:0.9rem;background:rgba(0,0,0,0.75);border:none;color:white;font-size:1.3rem;width:2.2rem;height:2.2rem;border-radius:50%;cursor:pointer;z-index:30}
+        .close-player-btn:hover{background:#ef4444}
+        .loading{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-radius:50%;border-top-color:transparent;animation:spin 0.6s linear infinite;margin-right:6px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        #statusArea{font-size:0.85rem;color:#94a3b8;margin-bottom:1rem}
+        @media (max-width:640px){.results-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>🎬 家庭影院 · 私有云版</h1>
+        <div class="sub-notice">后端代理 + KV存储 · 无CORS · 配置云端同步</div>
+    </div>
+
+    <div class="card hidden" id="playerCard" style="position:relative">
+        <button class="close-player-btn" id="closePlayerBtn">✕</button>
+        <div class="player-container"><iframe id="videoFrame" src="" allowfullscreen></iframe></div>
+        <div class="player-info">
+            <div class="player-title" id="playerTitle">—</div>
+            <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.25rem" id="playerSource"></div>
+            <div class="episode-list" id="episodeList"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="search-group">
+            <input type="text" id="searchKeyword" placeholder="输入电影/电视剧名，例如：热辣滚烫、庆余年" autocomplete="off">
+            <button class="btn btn-search" id="searchBtn">🔍 云端搜索</button>
+            <button class="btn btn-settings" id="settingsBtn">⚙️ 源管理</button>
+        </div>
+        <div id="statusArea"></div>
+        <div id="resultsContainer" class="results-grid"></div>
+    </div>
+
+    <div class="card hidden" id="settingsCard">
+        <h3>📡 影视源管理 (云端KV存储)</h3>
+        <div id="sourceList" class="source-list">加载中...</div>
+        <div class="add-form">
+            <input type="text" id="newSourceName" placeholder="源名称 (如: 极速资源)">
+            <input type="text" id="newSourceApi" placeholder="API地址 (如: https://xxx.com/api.php/provide/vod)">
+            <button class="btn btn-search" id="addSourceBtn">➕ 添加</button>
+            <button class="btn btn-settings" id="resetBtn" style="background:#b91c1c;">🔄 重置默认</button>
+        </div>
+        <p style="font-size:0.7rem; margin-top:10px; color:#6c86a3;">✅ 源配置保存在云端KV，所有设备同步 | 后端代理请求，无跨域问题</p>
+    </div>
+</div>
+
+<script>
+    // 前端调用后端API，无CORS困扰
+    const API = {
+        search: (keyword) => fetch('/api/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keyword })
+        }).then(r => r.json()),
+        
+        getSources: () => fetch('/api/sources').then(r => r.json()),
+        
+        addSource: (name, api) => fetch('/api/sources', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, api })
+        }).then(r => r.json()),
+        
+        deleteSource: (name) => fetch('/api/sources', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        }).then(r => r.json()),
+        
+        resetSources: () => fetch('/api/sources/reset', { method: 'POST' }).then(r => r.json())
+    };
+
+    function parsePlay(raw) {
+        if (!raw) return [];
+        const eps = [];
+        String(raw).split("$$$").forEach(line => {
+            line.split("#").forEach(part => {
+                const arr = part.split("$");
+                if (arr.length >= 2 && arr[1]) eps.push({ name: arr[0] || "播放", url: arr[1] });
+            });
+        });
+        return eps;
+    }
+
+    async function performSearch() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        if (!keyword) return alert('请输入影片名称');
+        
+        const statusDiv = document.getElementById('statusArea');
+        const resultsDiv = document.getElementById('resultsContainer');
+        statusDiv.innerHTML = '<span class="loading"></span> 云端聚合搜索中 (后端代理，无跨域限制)...';
+        resultsDiv.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:2rem;">⏳ 后端正在并行请求各影视源...</div>';
+        
+        try {
+            const data = await API.search(keyword);
+            const items = data.results || [];
+            
+            if (items.length === 0) {
+                statusDiv.textContent = '😞 未找到相关影视，试试其他关键词';
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            
+            statusDiv.textContent = `✨ 找到 ${items.length} 条结果，点击卡片播放`;
+            resultsDiv.innerHTML = '';
+            
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                const img = document.createElement('img');
+                img.className = 'result-cover';
+                img.src = item.cover || 'https://placehold.co/200x300?text=暂无海报';
+                img.onerror = () => img.src = 'https://placehold.co/200x300?text=封面缺失';
+                const info = document.createElement('div');
+                info.className = 'result-info';
+                info.innerHTML = `<div class="result-title">${escapeHtml(item.title)}</div><div class="result-source">📀 ${escapeHtml(item.sourceName)}</div>`;
+                card.appendChild(img);
+                card.appendChild(info);
+                card.onclick = () => {
+                    if (item.episodes?.length) {
+                        playVideo(item.episodes[0].url, item.title, item.sourceName, item.episodes, 0);
+                    } else {
+                        alert('该资源暂无播放链接');
+                    }
+                };
+                resultsDiv.appendChild(card);
+            });
+        } catch (err) {
+            statusDiv.textContent = '❌ 搜索失败: ' + err.message;
+        }
+    }
+
+    function playVideo(url, title, source, episodes, idx) {
+        if (!url) return alert('播放链接无效');
+        const playerCard = document.getElementById('playerCard');
+        playerCard.classList.remove('hidden');
+        document.getElementById('videoFrame').src = url;
+        document.getElementById('playerTitle').textContent = `${title} · ${episodes[idx]?.name || '正片'}`;
+        document.getElementById('playerSource').textContent = `🎞️ 来源：${source} | 后端代理加载`;
+        
+        const container = document.getElementById('episodeList');
+        container.innerHTML = '';
+        episodes.forEach((ep, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'episode-btn' + (i === idx ? ' active' : '');
+            btn.textContent = ep.name.length > 18 ? ep.name.slice(0,16)+'..' : ep.name;
+            btn.onclick = () => playVideo(ep.url, title, source, episodes, i);
+            container.appendChild(btn);
+        });
+        document.getElementById('playerCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closePlayer() {
+        document.getElementById('videoFrame').src = 'about:blank';
+        document.getElementById('playerCard').classList.add('hidden');
+    }
+
+    async function loadSourcesUI() {
+        const container = document.getElementById('sourceList');
+        try {
+            const sources = await API.getSources();
+            container.innerHTML = '';
+            sources.forEach(src => {
+                const tag = document.createElement('div');
+                tag.className = 'source-tag';
+                tag.innerHTML = `<span>${escapeHtml(src.name)}</span><button class="del-btn" data-name="${escapeHtml(src.name)}">✕</button>`;
+                container.appendChild(tag);
+            });
+            document.querySelectorAll('.del-btn').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const name = btn.getAttribute('data-name');
+                    if (confirm(`删除源“${name}”？`)) {
+                        await API.deleteSource(name);
+                        loadSourcesUI();
+                    }
+                };
+            });
+        } catch(e) {
+            container.innerHTML = '<span style="color:#ef4444;">加载失败，请刷新</span>';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
+    }
+
+    document.getElementById('searchBtn').onclick = performSearch;
+    document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsCard').classList.toggle('hidden');
+    document.getElementById('closePlayerBtn').onclick = closePlayer;
+    document.getElementById('searchKeyword').onkeypress = e => { if(e.key === 'Enter') performSearch(); };
+    
+    document.getElementById('addSourceBtn').onclick = async () => {
+        const name = document.getElementById('newSourceName').value.trim();
+        const api = document.getElementById('newSourceApi').value.trim();
+        if (!name || !api) return alert('请填写完整');
+        if (!api.startsWith('http')) return alert('API地址需以 http:// 或 https:// 开头');
+        const res = await API.addSource(name, api);
+        if (res.success) {
+            document.getElementById('newSourceName').value = '';
+            document.getElementById('newSourceApi').value = '';
+            loadSourcesUI();
+            alert('✅ 添加成功 (已保存至云端KV)');
+        } else {
+            alert(res.error || '添加失败');
+        }
+    };
+    
+    document.getElementById('resetBtn').onclick = async () => {
+        if (confirm('重置所有源为默认配置？')) {
+            await API.resetSources();
+            loadSourcesUI();
+            alert('已重置为默认源列表');
+        }
+    };
+    
+    loadSourcesUI();
+</script>
+</body>
+</html>
