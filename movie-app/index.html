@@ -1,10 +1,9 @@
-<!-- index.html - 前端界面 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>家庭影院 | 私有云聚合</title>
+    <title>家庭影院 | KV云存储版</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:linear-gradient(145deg,#0a0c15 0%,#07090f 100%);font-family:system-ui,'Segoe UI',Roboto,sans-serif;color:#f0f3fa;padding:1rem;min-height:100vh}
@@ -47,7 +46,7 @@
 <body>
 <div class="container">
     <div class="hero">
-        <h1>🎬 家庭影院 · 私有云版</h1>
+        <h1>🎬 家庭影院 · KV云存储版</h1>
         <div class="sub-notice">后端代理 + KV存储 · 无CORS · 配置云端同步</div>
     </div>
 
@@ -85,7 +84,6 @@
 </div>
 
 <script>
-    // 前端调用后端API，无CORS困扰
     const API = {
         search: (keyword) => fetch('/api/search', {
             method: 'POST',
@@ -128,7 +126,7 @@
         
         const statusDiv = document.getElementById('statusArea');
         const resultsDiv = document.getElementById('resultsContainer');
-        statusDiv.innerHTML = '<span class="loading"></span> 云端聚合搜索中 (后端代理，无跨域限制)...';
+        statusDiv.innerHTML = '<span class="loading"></span> 云端聚合搜索中...';
         resultsDiv.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:2rem;">⏳ 后端正在并行请求各影视源...</div>';
         
         try {
@@ -176,7 +174,7 @@
         playerCard.classList.remove('hidden');
         document.getElementById('videoFrame').src = url;
         document.getElementById('playerTitle').textContent = `${title} · ${episodes[idx]?.name || '正片'}`;
-        document.getElementById('playerSource').textContent = `🎞️ 来源：${source} | 后端代理加载`;
+        document.getElementById('playerSource').textContent = `🎞️ 来源：${source}`;
         
         const container = document.getElementById('episodeList');
         container.innerHTML = '';
