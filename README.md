@@ -1,6 +1,6 @@
 # 电影网站
-一个部署在腾讯云
-https://console.cloud.tencent.com/edgeone/pages
+
+一个部署在腾讯云：https://console.cloud.tencent.com/edgeone/pages
 
 上的电影网站，仅供学习部署技巧不得商业运营，
 
@@ -14,13 +14,9 @@ movie-kv/functions/api/search.js
    
 部署步骤
 
-创建 movie-kv 文件夹
+下载 movie-kv 文件夹
 
-创建 index.html
-
-创建 functions/api/search.js
-
-选中 index.html 和 functions 文件夹，压缩成 ZIP
+压缩成 ZIP
 
 上传到 EdgeOne Pages
 
