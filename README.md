@@ -1,7 +1,11 @@
 # 电影网站
 一个部署在腾讯云
 https://console.cloud.tencent.com/edgeone/pages
-上的电影网站，仅供学习部署技巧不得商业运营，否则一切相关被追责的后果自负。
+
+上的电影网站，仅供学习部署技巧不得商业运营，
+
+否则一切相关被追责的后果自负。
+
 文件结构
 
 movie-kv/index.html
@@ -9,6 +13,7 @@ movie-kv/index.html
 movie-kv/functions/api/search.js
    
 部署步骤
+
 创建 movie-kv 文件夹
 
 创建 index.html，复制上面的代码
