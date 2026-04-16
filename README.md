@@ -3,12 +3,11 @@
 https://console.cloud.tencent.com/edgeone/pages
 上的电影网站，仅供学习部署技巧不得商业运营，否则一切相关被追责的后果自负。
 文件结构
-text
-movie-kv/
-├── index.html
-└── functions/
-    └── api/
-        └── search.js
+
+movie-kv/index.html
+
+movie-kv/functions/api/search.js
+   
 部署步骤
 创建 movie-kv 文件夹
 
