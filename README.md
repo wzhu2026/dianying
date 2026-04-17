@@ -2,6 +2,8 @@
 
 一个部署在腾讯云：https://console.cloud.tencent.com/edgeone/pages
 
+[![Deploy to CloudBase](https://qcloudimg.tencent-cloud.cn/raw/fdfede7f163bddfef9b826bbc94a1f32/cloudbase-deploy-button.svg)](https://tcb.cloud.tencent.com/dev#/static/hosting?repo-url=https://github.com/wzhu2026/dianying)
+
 上的电影网站，仅供学习部署技巧不得商业运营，
 
 否则一切相关被追责的后果自负。
